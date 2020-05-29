@@ -1,0 +1,50 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8\n"
+
+msgid "Trojan Go Server"
+msgstr "Trojan Go 服务器"
+
+msgid "Trojan Go Server Config"
+msgstr "Trojan Go 服务器设置"
+
+msgid "Global Setting"
+msgstr "全局设置"
+
+msgid "Encrypt Method"
+msgstr "加密"
+
+msgid "Protocol_param"
+msgstr "协议参数"
+
+msgid "Obfs"
+msgstr "混淆"
+
+msgid "Trojan Listen Port"
+msgstr "Trojan 本地监听端口"
+
+msgid "Remote Http Server Address"
+msgstr "Http 远程服务器地址"
+
+msgid "Remote Http Server Port"
+msgstr "Http 远程服务器地址端口"
+
+msgid "SSL Key File Path"
+msgstr "SSL Key 文件路径"
+
+msgid "SSL Cert File Path"
+msgstr "SSL Cert 文件路径"
+
+msgid "Obfs_param"
+msgstr "混淆参数"
+
+msgid "redirect"
+msgstr "重定向"
+
+msgid "Connection Timeout"
+msgstr "连接超时时间"
+
+msgid "Trojan Go Server is a fork of the Trojan Go project, claimed to be superior in terms of security and stability"
+msgstr "Trojan Go 服务器是一个增加了协议参数和混淆的全功能版本"
+
+msgid "Trojan Go Server"
+msgstr "Trojan Go 服务器"

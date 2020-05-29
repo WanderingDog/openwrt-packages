@@ -452,6 +452,7 @@ class TCPRelayHandler(object):
         if type(host_list) != list:
             host_list = [host_list]
 
+        logging.info('hostinfo TCP port ' + host_list[0] )
         items_sum = common.to_str(host_list[0]).rsplit('#', 1)
         if len(items_sum) < 2:
             hash_code = binascii.crc32(ogn_data)

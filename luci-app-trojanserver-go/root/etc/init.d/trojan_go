@@ -1,0 +1,94 @@
+#!/bin/sh /etc/rc.common
+#
+# Copyright (C) 2015 OpenWrt-dist
+#
+# This is free software, licensed under the GNU General Public License v3.
+# See /LICENSE for more information.
+#
+
+START=120
+
+CONFIG=trojan_go
+CONFIG_FILE=/var/etc/$CONFIG.json
+PID_FILE=/var/run/$CONFIG.pid
+LOG_FILE=/var/log/$CONFIG.log
+
+uci_get_by_type() {
+	local index=0
+	if [ -n $4 ]; then
+		index=$4
+	fi
+	local ret=$(uci get $CONFIG.@$1[$index].$2 2>/dev/null)
+	echo ${ret:=$3}
+}
+
+is_true() {
+	case $1 in
+		1|on|true|yes|enabled) echo 0;;
+		*) echo 1;;
+	esac
+}
+
+load_config() {
+	ENABLED=$(uci_get_by_type server enable)
+	return $(is_true $ENABLED)
+}
+
+start_server() {
+	mkdir -p  /var/etc
+	/usr/sbin/trojan-go  \
+	-config $CONFIG_FILE  \
+	--pid-file $PID_FILE  \
+    start  \
+	>/dev/null 2>&1 &
+}
+
+gen_config_file() {
+	cat <<-EOF >$CONFIG_FILE
+	{
+		"run_type":"server",
+		"local_addr":"0.0.0.0",
+		"local_port": $(uci_get_by_type server server_port),
+		"remote_addr": "$(uci_get_by_type server remote_server_address)",
+		"remote_port": $(uci_get_by_type server remote_server_port),
+		"password": 
+			[
+				$(uci_get_by_type server password)
+			],
+		"log_level":1,
+		"LogFile":"$LOG_FILE",
+		"ssl":{
+			"cert":"$(uci_get_by_type server ssl_cert_path)",
+			"key":"$(uci_get_by_type server ssl_key_path)"
+		}
+		
+	}
+EOF
+}
+
+
+add_rule() {
+    serverport=$(uci_get_by_type server server_port)
+    uci set firewall.trojan_go.dest_port=$serverport && uci commit firewall &&  /etc/init.d/firewall restart
+}
+
+del_rule() {
+    serverport=$(uci_get_by_type server server_port)
+}
+
+start() {
+	! load_config && exit 0
+	gen_config_file "server"
+	start_server	
+	add_rule
+}
+
+stop() {
+  del_rule
+	/usr/sbin/trojan-go  \
+	-c $CONFIG_FILE  \
+	--pid-file $PID_FILE  \
+	stop  \
+	>/dev/null 2>&1 &
+	rm -f $LOG_FILE
+}

@@ -1,0 +1,10 @@
+
+config server 'trojan_go'
+	option server_port '443'
+	option remote_server_address '172.1.1'
+	option remote_server_port '80'
+	option ssl_key_path '/opt/ssl/xxx.key'
+	option ssl_cert_path '/opt/ssl/xxx.cert'
+	option password '1234abcd'
+	option enable '0'
+
