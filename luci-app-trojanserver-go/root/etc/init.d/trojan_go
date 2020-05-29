@@ -36,7 +36,7 @@ load_config() {
 
 start_server() {
 	mkdir -p  /var/etc
-	/usr/sbin/trojan-go  \
+	/usr/bin/trojan-go/trojan-go  \
 	-config $CONFIG_FILE  \
 	--pid-file $PID_FILE  \
     start  \
@@ -85,7 +85,7 @@ start() {
 
 stop() {
   del_rule
-	/usr/sbin/trojan-go  \
+	/usr/bin/trojan-go/trojan-go \
 	-c $CONFIG_FILE  \
 	--pid-file $PID_FILE  \
 	stop  \

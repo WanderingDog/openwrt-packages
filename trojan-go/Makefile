@@ -6,30 +6,6 @@
 #
 include $(TOPDIR)/rules.mk
 
-ifeq ($(ARCH),i386)
-	CORE-TYPE:=86
-endif
-
-ifeq ($(ARCH),x86_64)
-	CORE-TYPE:=amd64
-endif
-
-ifeq ($(ARCH),mipsel)
-	CORE-TYPE:=mipsle
-endif
-
-ifeq ($(ARCH),mips)
-	CORE-TYPE:=mipsle
-endif
-
-ifeq ($(ARCH),arm)
-	CORE-TYPE:=arm
-endif
-
-ifeq ($(ARCH),aarch64)
-	CORE-TYPE:=arm64
-endif
-
 
 PKG_NAME:=trojan-go
 PKG_VERSION:=v0.5.1
@@ -40,6 +16,11 @@ PKG_SOURCE_URL:=https://github.com/p4gefau1t/trojan-go.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_VERSION:=e52f251b71b0831f2c27fa7be4582879b6f0e265
 PKG_SOURCE:=$(PKG_NAME)-linux-amd64.zip
+PKG_SOURCE_URL:=https://github.com/p4gefau1t/trojan-go/releases/download/v0.5.1/
+
+UNZIP_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)/$(PKG_NAME)
+
+PKG_HASH:=skip
 
 CMAKE_INSTALL:=1
 PKG_BUILD_PARALLEL:=0
@@ -76,6 +57,11 @@ CMAKE_OPTIONS += \
 	-DBoost_DEBUG=ON \
 	-DBoost_NO_BOOST_CMAKE=ON
 
+define Build/Prepare
+	mkdir -vp $(UNZIP_DIR)
+	unzip -od $(UNZIP_DIR) $(DL_DIR)/$(PKG_SOURCE)
+endef
+
 define Package/trojan-go
 	SECTION:=net
 	CATEGORY:=Network
@@ -86,8 +72,9 @@ define Package/trojan-go
 endef
 
 define Package/trojan-go/install
-	$(INSTALL_DIR) $(1)/usr/sbin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/trojan-go $(1)/usr/sbin/trojan-go
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(UNZIP_DIR) $(1)/usr/bin/$(PKG_NAME)
+	chmod 755 $(1)/usr/bin/$(PKG_NAME)
 endef
 
 $(eval $(call BuildPackage,trojan-go))
