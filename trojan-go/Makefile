@@ -6,6 +6,31 @@
 #
 include $(TOPDIR)/rules.mk
 
+ifeq ($(ARCH),i386)
+	CORE-TYPE:=86
+endif
+
+ifeq ($(ARCH),x86_64)
+	CORE-TYPE:=amd64
+endif
+
+ifeq ($(ARCH),mipsel)
+	CORE-TYPE:=mipsle
+endif
+
+ifeq ($(ARCH),mips)
+	CORE-TYPE:=mipsle
+endif
+
+ifeq ($(ARCH),arm)
+	CORE-TYPE:=arm
+endif
+
+ifeq ($(ARCH),aarch64)
+	CORE-TYPE:=arm64
+endif
+
+
 PKG_NAME:=trojan-go
 PKG_VERSION:=v0.5.1
 PKG_RELEASE:=1
@@ -14,7 +39,7 @@ PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=https://github.com/p4gefau1t/trojan-go.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
 PKG_SOURCE_VERSION:=e52f251b71b0831f2c27fa7be4582879b6f0e265
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_SOURCE_VERSION).zip
+PKG_SOURCE:=$(PKG_NAME)-linux-$(CORE-TYPE).zip
 
 CMAKE_INSTALL:=1
 PKG_BUILD_PARALLEL:=0
