@@ -36,6 +36,7 @@ e.rmempty=false
 
 e=t:option(Value,"remote_server_address",translate("Remote Http Server Address"))
 e.rmempty=false
+e.default="172.17.0.1"
 
 e=t:option(Value,"remote_server_port",translate("Remote Http Server Port"))
 e.datatype="port"
