@@ -81,7 +81,7 @@ gen_config_file() {
 	        	"cipher_tls13": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
         		"fingerprint": "auto",
         		"sni":"*.gfw.com",
-	        	"verify_hostname":true
+	        	"verify_hostname":false
 		},
 		"enable":$(uci_get_by_type server enable)
 		
