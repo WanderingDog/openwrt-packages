@@ -6,5 +6,14 @@ config server 'trojan_go'
 	option ssl_key_path '/opt/ssl/xxx.key'
 	option ssl_cert_path '/opt/ssl/xxx.cert'
 	option password '1234abcd'
-	option enable '0'
+	option enable 0
 
+
+
+firewall-cmd --zone=public --remove-forward-port=port=2010:proto=tcp:toport=8010 --permanent && firewall-cmd --reload 
+
+
+firewall-cmd --zone=public --add-forward-port=port=8888:proto=tcp:toport=8010 --permanent  
+firewall-cmd --zone=public --add-forward-port=port=443:proto=tcp:toport=8020 --permanent 
+firewall-cmd --add-port=8099/tcp --permanent
+firewall-cmd --reload && firewall-cmd --list-all

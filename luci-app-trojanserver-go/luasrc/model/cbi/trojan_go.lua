@@ -16,7 +16,7 @@ t=a:section(TypedSection,"server",translate(""))
 t.anonymous=true
 t.addremove=false
 
-e=t:option(Flag,"enable",translate("Enable"))
+e=t:option(Flag,"enable",translate("enable"))
 e.rmempty=false
 
 e=t:option(Value,"server_port",translate("Trojan Listen Port"))
@@ -42,5 +42,10 @@ e=t:option(Value,"remote_server_port",translate("Remote Http Server Port"))
 e.datatype="port"
 e.rmempty=false
 e.default=80
+
+local apply = luci.http.formvalue("cbi.apply")
+if apply then 
+	io.popen('/etc/init.d/trojan_go reload')
+end 
 
 return a

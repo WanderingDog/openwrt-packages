@@ -6,12 +6,18 @@
 # See /LICENSE for more information.
 #
 
-START=120
+START=50
+USE_PROCD=1
+PROG=/usr/bin/trojan-go/trojan-go
 
 CONFIG=trojan_go
-CONFIG_FILE=/var/etc/$CONFIG.json
+CONFIG_FILE=/etc/config/$CONFIG
+RUN_CONFIG_FILE=/var/etc/$CONFIG.json
 PID_FILE=/var/run/$CONFIG.pid
 LOG_FILE=/var/log/$CONFIG.log
+
+
+alias echo_date='echo $(date +%Y-%m-%d\ %X):'
 
 uci_get_by_type() {
 	local index=0
@@ -34,23 +40,34 @@ load_config() {
 	return $(is_true $ENABLED)
 }
 
-start_server() {
-	mkdir -p  /var/etc
-	/usr/bin/trojan-go/trojan-go  \
-	-config $CONFIG_FILE  \
-	--pid-file $PID_FILE  \
-    start  \
-	>/dev/null 2>&1 &
+
+start_service() {	
+        /etc/init.d/trojan_go stop
+        gen_config_file "server"
+	! load_config && exit 0
+	procd_open_instance
+	procd_set_param command "$PROG" -config $RUN_CONFIG_FILE
+	procd_close_instance
 }
 
+
 gen_config_file() {
-	cat <<-EOF >$CONFIG_FILE
+	echo_date  $(uci_get_by_type server password)
+	cat <<-EOF >$RUN_CONFIG_FILE
 	{
 		"run_type":"server",
 		"local_addr":"0.0.0.0",
 		"local_port": $(uci_get_by_type server server_port),
 		"remote_addr": "$(uci_get_by_type server remote_server_address)",
 		"remote_port": $(uci_get_by_type server remote_server_port),
+		"dns":["8.8.8.8","8.8.4.4","114.114.114.114"],
+		"buffer_size":64,		
+		"tcp":{	
+			"no_delay": true,
+			"keep_alive": false,
+			"reuse_port": false,
+			"fast_open": false
+		},
 		"password": 
 			[
 				$(uci_get_by_type server password)
@@ -59,8 +76,14 @@ gen_config_file() {
 		"LogFile":"$LOG_FILE",
 		"ssl":{
 			"cert":"$(uci_get_by_type server ssl_cert_path)",
-			"key":"$(uci_get_by_type server ssl_key_path)"
-		}
+			"key":"$(uci_get_by_type server ssl_key_path)",
+ 			"cipher": "TLS_RSA_WITH_3DES_EDE_CBC_SHA:TLS_RSA_WITH_AES_128_CBC_SHA:TLS_RSA_WITH_AES_256_CBC_SHA:TLS_RSA_WITH_AES_128_GCM_SHA256:TLS_RSA_WITH_AES_256_GCM_SHA384:TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA:TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA:TLS_ECDHE_RSA_WITH_3DES_EDE_CBC_SHA:TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA:TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA:TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256:TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384:TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+	        	"cipher_tls13": "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+        		"fingerprint": "auto",
+        		"sni":"*.gfw.com",
+	        	"verify_hostname":true
+		},
+		"enable":$(uci_get_by_type server enable)
 		
 	}
 EOF
@@ -77,18 +100,24 @@ del_rule() {
 }
 
 start() {
-	! load_config && exit 0
+	/etc/init.d/trojan_go stop
+	echo_date Start create config.json
 	gen_config_file "server"
+	! load_config && exit 0
 	start_server	
-	add_rule
+	
 }
-
-stop() {
-  del_rule
-	/usr/bin/trojan-go/trojan-go \
-	-c $CONFIG_FILE  \
-	--pid-file $PID_FILE  \
-	stop  \
-	>/dev/null 2>&1 &
-	rm -f $LOG_FILE
+service_triggers(){	
+	procd_add_reload_trigger "trojan_go"
+}
+stop_service() {
+	# echo_date Kill process..
+	# killall trojan-go
+	# agen_config_file "server"
+    	rm -f $LOG_FILE
+}
+reload_service() {
+	/etc/init.d/trojan_go stop
+	gen_config_file "server"
+	/etc/init.d/trojan_go start
 }
